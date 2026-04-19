@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinInsight AI — Your Personal CFO</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0f1a;
+  --bg2: #111827;
+  --bg3: #1c2336;
+  --bg4: #232d42;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f4ff;
+  --text2: #8b96b0;
+  --text3: #5a6680;
+  --accent: #6c8eff;
+  --accent2: #4f6ef7;
+  --green: #34d399;
+  --green2: #059669;
+  --red: #f87171;
+  --red2: #dc2626;
+  --amber: #fbbf24;
+  --amber2: #d97706;
+  --purple: #a78bfa;
+  --teal: #2dd4bf;
+  --coral: #fb923c;
+  --font: 'DM Sans', sans-serif;
+  --font-serif: 'DM Serif Display', serif;
+  --font-mono: 'DM Mono', monospace;
+  --r: 12px;
+  --r2: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
+
+/* Layout */
+.app { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 240px; min-width: 240px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 0.5rem; }
+.main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+/* Sidebar */
+.logo { display: flex; align-items: center; gap: 10px; padding: 0.5rem 0.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem; }
+.logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), var(--purple)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.logo-text { font-family: var(--font-serif); font-size: 1.1rem; color: var(--text); }
+.logo-text span { color: var(--accent); }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 0.6rem 0.75rem; border-radius: var(--r2); cursor: pointer; color: var(--text2); font-size: 0.875rem; font-weight: 400; transition: all 0.15s; border: 1px solid transparent; }
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: rgba(108, 142, 255, 0.12); color: var(--accent); border-color: rgba(108,142,255,0.2); }
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-section { font-size: 0.7rem; letter-spacing: 0.08em; color: var(--text3); padding: 1rem 0.75rem 0.4rem; text-transform: uppercase; }
+.sidebar-bottom { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
+.privacy-badge { display: flex; align-items: center; gap: 8px; padding: 0.5rem 0.75rem; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); border-radius: var(--r2); font-size: 0.75rem; color: var(--green); }
+
+/* Header */
+.page-header { padding: 1.5rem 2rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.page-title { font-family: var(--font-serif); font-size: 1.6rem; }
+.page-sub { font-size: 0.8rem; color: var(--text2); margin-top: 2px; }
+.header-actions { display: flex; gap: 10px; align-items: center; }
+.btn { padding: 0.5rem 1rem; border-radius: var(--r2); font-size: 0.8rem; font-family: var(--font); cursor: pointer; border: 1px solid var(--border2); background: var(--bg3); color: var(--text); transition: all 0.15s; font-weight: 500; }
+.btn:hover { background: var(--bg4); border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--accent2); border-color: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent); }
+.btn-danger { background: rgba(220,38,38,0.15); border-color: rgba(248,113,113,0.4); color: var(--red); }
+.btn-danger:hover { background: rgba(220,38,38,0.25); }
+
+/* Page content */
+.page { display: none; flex-direction: column; flex: 1; }
+.page.active { display: flex; }
+.page-content { padding: 1.5rem 2rem; flex: 1; }
+
+/* Cards */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 1.25rem 1.5rem; }
+.card-title { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+.card-value { font-size: 1.8rem; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; }
+.card-change { font-size: 0.8rem; margin-top: 4px; }
+.card-change.up { color: var(--green); }
+.card-change.down { color: var(--red); }
+
+/* Grid */
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.gap-1 { gap: 1rem; }
+.gap-sm { gap: 0.75rem; }
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 1.5rem; }
+
+/* Chart wrapper */
+.chart-wrap { position: relative; height: 240px; }
+.chart-wrap-sm { position: relative; height: 180px; }
+.chart-wrap-lg { position: relative; height: 320px; }
+
+/* Insight cards */
+.insight { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem 1.25rem; display: flex; gap: 12px; }
+.insight-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.insight-icon.warn { background: rgba(251,191,36,0.12); }
+.insight-icon.info { background: rgba(108,142,255,0.12); }
+.insight-icon.danger { background: rgba(248,113,113,0.12); }
+.insight-icon.success { background: rgba(52,211,153,0.12); }
+.insight-body { flex: 1; }
+.insight-title { font-weight: 500; font-size: 0.875rem; margin-bottom: 4px; }
+.insight-text { font-size: 0.8rem; color: var(--text2); line-height: 1.5; }
+.insight-tag { display: inline-block; font-size: 0.65rem; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 4px; margin-top: 6px; font-weight: 500; }
+.tag-warn { background: rgba(251,191,36,0.12); color: var(--amber); }
+.tag-danger { background: rgba(248,113,113,0.12); color: var(--red); }
+.tag-info { background: rgba(108,142,255,0.12); color: var(--accent); }
+.tag-success { background: rgba(52,211,153,0.12); color: var(--green); }
+
+/* Transaction table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+thead tr { border-bottom: 1px solid var(--border); }
+th { padding: 0.6rem 0.75rem; text-align: left; color: var(--text3); font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; }
+td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text2); }
+td:first-child { color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.amount-debit { color: var(--red); font-family: var(--font-mono); font-size: 0.8rem; }
+.amount-credit { color: var(--green); font-family: var(--font-mono); font-size: 0.8rem; }
+.cat-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 500; }
+
+/* Chat */
+.chat-container { display: flex; flex-direction: column; height: 100%; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+.msg { display: flex; gap: 12px; max-width: 780px; }
+.msg.user { flex-direction: row-reverse; margin-left: auto; }
+.msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.msg-avatar.ai { background: linear-gradient(135deg, var(--accent), var(--purple)); color: white; font-weight: 600; }
+.msg-avatar.user { background: var(--bg4); color: var(--text2); }
+.msg-bubble { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 0.875rem 1.1rem; font-size: 0.875rem; line-height: 1.65; max-width: 640px; }
+.msg.user .msg-bubble { background: rgba(108,142,255,0.1); border-color: rgba(108,142,255,0.2); }
+.msg-bubble strong { color: var(--text); font-weight: 500; }
+.msg-bubble .highlight { color: var(--accent); font-family: var(--font-mono); font-size: 0.82rem; background: rgba(108,142,255,0.08); padding: 1px 5px; border-radius: 4px; }
+.msg-name { font-size: 0.72rem; color: var(--text3); margin-bottom: 5px; }
+.msg-time { font-size: 0.7rem; color: var(--text3); margin-top: 4px; }
+.chat-chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 2rem 1rem; }
+.chip { padding: 0.35rem 0.85rem; border: 1px solid var(--border2); border-radius: 20px; font-size: 0.78rem; color: var(--text2); cursor: pointer; transition: all 0.15s; background: var(--bg2); }
+.chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,142,255,0.06); }
+.chat-input-area { padding: 1rem 2rem 1.5rem; border-top: 1px solid var(--border); }
+.chat-input-wrap { display: flex; gap: 10px; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--r); padding: 0.5rem 0.75rem; }
+.chat-input { flex: 1; background: none; border: none; color: var(--text); font-family: var(--font); font-size: 0.875rem; outline: none; resize: none; }
+.chat-input::placeholder { color: var(--text3); }
+.chat-send { width: 32px; height: 32px; border-radius: 8px; background: var(--accent2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: all 0.15s; flex-shrink: 0; align-self: flex-end; }
+.chat-send:hover { background: var(--accent); }
+.chat-send svg { width: 14px; height: 14px; }
+
+/* Upload zone */
+.upload-zone { border: 2px dashed var(--border2); border-radius: var(--r); padding: 3rem 2rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(108,142,255,0.04); }
+.upload-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.upload-title { font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem; }
+.upload-sub { font-size: 0.8rem; color: var(--text2); }
+.upload-formats { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+.fmt-badge { padding: 3px 10px; border: 1px solid var(--border2); border-radius: 4px; font-size: 0.7rem; color: var(--text3); font-family: var(--font-mono); }
+
+/* Progress bars */
+.progress-bar { height: 6px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+/* Category colors */
+.cat-dining { background: rgba(251,191,36,0.15); color: var(--amber); }
+.cat-groceries { background: rgba(52,211,153,0.12); color: var(--green); }
+.cat-transport { background: rgba(108,142,255,0.12); color: var(--accent); }
+.cat-subscriptions { background: rgba(167,139,250,0.15); color: var(--purple); }
+.cat-entertainment { background: rgba(251,146,60,0.15); color: var(--coral); }
+.cat-health { background: rgba(45,212,191,0.12); color: var(--teal); }
+.cat-shopping { background: rgba(248,113,113,0.12); color: var(--red); }
+.cat-income { background: rgba(52,211,153,0.12); color: var(--green); }
+
+/* Goal bars */
+.goal-item { margin-bottom: 1.1rem; }
+.goal-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.goal-name { font-size: 0.83rem; }
+.goal-amounts { font-size: 0.75rem; color: var(--text2); font-family: var(--font-mono); }
+
+/* Privacy panel */
+.privacy-row { display: flex; justify-content: space-between; align-items: center; padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+.privacy-row:last-child { border-bottom: none; }
+.privacy-label { font-size: 0.875rem; }
+.privacy-sub { font-size: 0.78rem; color: var(--text2); margin-top: 2px; }
+.toggle { width: 42px; height: 24px; background: var(--bg4); border-radius: 12px; cursor: pointer; position: relative; transition: background 0.2s; border: 1px solid var(--border2); flex-shrink: 0; }
+.toggle.on { background: var(--green2); border-color: var(--green); }
+.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: left 0.2s; }
+.toggle.on::after { left: 20px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+/* Loading */
+.typing-dot { display: inline-block; width: 6px; height: 6px; background: var(--text3); border-radius: 50%; animation: typing 1.4s ease-in-out infinite; margin: 0 2px; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%,60%,100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+/* Heatmap */
+.heatmap { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+.heatmap-cell { height: 28px; border-radius: 3px; background: var(--bg4); transition: transform 0.1s; cursor: default; }
+.heatmap-cell:hover { transform: scale(1.2); }
+
+/* Anomaly */
+.anomaly-item { display: flex; align-items: flex-start; gap: 12px; padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+.anomaly-item:last-child { border-bottom: none; }
+.anomaly-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+
+/* Status dot */
+.status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+/* Mobile responsive */
+@media (max-width: 900px) {
+  .sidebar { width: 60px; min-width: 60px; }
+  .nav-item span:not(.nav-icon) { display: none; }
+  .logo-text { display: none; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .page-content { padding: 1rem; }
+  .chat-messages { padding: 1rem; }
+  .chat-chips { padding: 0 1rem 0.75rem; }
+  .chat-input-area { padding: 0.75rem 1rem 1rem; }
+}
+
+/* Notification */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--r); padding: 0.875rem 1.25rem; font-size: 0.83rem; z-index: 1000; transform: translateY(80px); opacity: 0; transition: all 0.3s; box-shadow: var(--shadow); max-width: 320px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Upload progress simulation */
+.upload-progress { display: none; }
+.upload-progress.show { display: block; }
+.upload-file-item { display: flex; align-items: center; gap: 12px; padding: 0.75rem; background: var(--bg3); border-radius: var(--r2); margin-bottom: 8px; }
+.file-icon { font-size: 1.5rem; }
+.file-info { flex: 1; }
+.file-name { font-size: 0.83rem; font-weight: 500; }
+.file-size { font-size: 0.75rem; color: var(--text2); }
+.file-status { font-size: 0.75rem; color: var(--green); }
+
+/* Section header */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.section-title { font-size: 0.9rem; font-weight: 500; }
+.section-link { font-size: 0.78rem; color: var(--accent); cursor: pointer; }
+.section-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">💰</div>
+      <div class="logo-text">Fin<span>Insight</span></div>
+    </div>
+    <div class="nav-section">Main</div>
+    <div class="nav-item active" onclick="navigate('dashboard')"><span class="nav-icon">📊</span><span>Dashboard</span></div>
+    <div class="nav-item" onclick="navigate('chat')"><span class="nav-icon">💬</span><span>AI Advisor</span></div>
+    <div class="nav-item" onclick="navigate('transactions')"><span class="nav-icon">📋</span><span>Transactions</span></div>
+    <div class="nav-item" onclick="navigate('upload')"><span class="nav-icon">⬆️</span><span>Upload Data</span></div>
+    <div class="nav-section">Analytics</div>
+    <div class="nav-item" onclick="navigate('insights')"><span class="nav-icon">🔍</span><span>Insights</span></div>
+    <div class="nav-item" onclick="navigate('goals')"><span class="nav-icon">🎯</span><span>Goals</span></div>
+    <div class="nav-section">Settings</div>
+    <div class="nav-item" onclick="navigate('privacy')"><span class="nav-icon">🔒</span><span>Privacy</span></div>
+    <div class="sidebar-bottom">
+      <div class="privacy-badge"><span>🛡️</span><span>Zero-Retention Mode</span></div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Financial Dashboard</div>
+          <div class="page-sub">April 2026 · Last synced 2 mins ago</div>
+        </div>
+        <div class="header-actions">
+          <select class="btn" id="period-select" onchange="updateCharts()">
+            <option value="3m">Last 3 months</option>
+            <option value="6m" selected>Last 6 months</option>
+            <option value="12m">Last 12 months</option>
+          </select>
+          <button class="btn btn-primary" onclick="navigate('upload')">+ Import</button>
+        </div>
+      </div>
+      <div class="page-content">
+        <!-- KPI cards -->
+        <div class="grid-4 gap-1">
+          <div class="card">
+            <div class="card-title">Net Worth</div>
+            <div class="card-value" style="color:var(--green)">$47,832</div>
+            <div class="card-change up">▲ 4.2% this month</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Monthly Spend</div>
+            <div class="card-value">$3,241</div>
+            <div class="card-change down">▼ 8% vs last month</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Monthly Income</div>
+            <div class="card-value" style="color:var(--green)">$5,800</div>
+            <div class="card-change up">▲ Salary + freelance</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Savings Rate</div>
+            <div class="card-value" style="color:var(--accent)">44.1%</div>
+            <div class="card-change up">▲ 3.2% vs goal</div>
+          </div>
+        </div>
+
+        <!-- Charts row -->
+        <div class="grid-2 mt-2">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Spending by Category</div>
+              <span class="section-link" onclick="navigate('insights')">Details →</span>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="donutChart" role="img" aria-label="Spending by category donut chart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Income vs Spending Trend</div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="trendChart" role="img" aria-label="Monthly income vs spending trend"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insights + Anomalies -->
+        <div class="grid-2 mt-2">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">AI Insights</div>
+              <span class="section-link" onclick="navigate('chat')">Ask CFO →</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+              <div class="insight">
+                <div class="insight-icon warn">⚠️</div>
+                <div class="insight-body">
+                  <div class="insight-title">Late-Night Dining Spike</div>
+                  <div class="insight-text">Your dining spend jumped <strong>62%</strong> ($487 vs $301 avg), driven by 9 Uber Eats orders after 10pm. At this rate, you'll overspend Fun Money by <strong>$680 this quarter</strong>.</div>
+                  <div class="insight-tag tag-warn">ACTION NEEDED</div>
+                </div>
+              </div>
+              <div class="insight">
+                <div class="insight-icon success">✨</div>
+                <div class="insight-body">
+                  <div class="insight-title">Subscription Audit Win</div>
+                  <div class="insight-text">You're paying for <strong>3 streaming services</strong> but Netflix & HBO Max usage dropped 80%. Cancelling both saves <strong>$26.98/mo = $323/yr</strong>.</div>
+                  <div class="insight-tag tag-success">SAVE $323/YR</div>
+                </div>
+              </div>
+              <div class="insight">
+                <div class="insight-icon info">📈</div>
+                <div class="insight-body">
+                  <div class="insight-title">Investment Opportunity</div>
+                  <div class="insight-text">Your checking account holds <strong>$12,400</strong> — $8K above your 3-month emergency fund target. Moving $4K to an index fund aligns with your stated goal.</div>
+                  <div class="insight-tag tag-info">OPPORTUNITY</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Anomaly Detection</div>
+              <span class="section-link" onclick="navigate('insights')">View all →</span>
+            </div>
+            <div>
+              <div class="anomaly-item">
+                <span class="anomaly-dot" style="background:var(--red)"></span>
+                <div>
+                  <div style="font-size:0.83rem;font-weight:500;">Duplicate charge suspected</div>
+                  <div style="font-size:0.78rem;color:var(--text2);margin-top:2px;">Amazon — 2× $47.99 on Apr 3rd, likely same order charged twice. Est. refund: <span style="color:var(--green)">$47.99</span></div>
+                </div>
+              </div>
+              <div class="anomaly-item">
+                <span class="anomaly-dot" style="background:var(--amber)"></span>
+                <div>
+                  <div style="font-size:0.83rem;font-weight:500;">3.1× surge vs monthly baseline</div>
+                  <div style="font-size:0.78rem;color:var(--text2);margin-top:2px;">Entertainment spiked to $342 (avg $110). Coachella tickets + AirBnB drove this one-time event.</div>
+                </div>
+              </div>
+              <div class="anomaly-item">
+                <span class="anomaly-dot" style="background:var(--amber)"></span>
+                <div>
+                  <div style="font-size:0.83rem;font-weight:500;">Unusual merchant frequency</div>
+                  <div style="font-size:0.78rem;color:var(--text2);margin-top:2px;">Starbucks: 22 visits this month vs 9 avg. Extra spend: <span style="color:var(--red)">$78</span>. Pattern: daily Mon-Fri 8-9am.</div>
+                </div>
+              </div>
+              <div class="anomaly-item">
+                <span class="anomaly-dot" style="background:var(--accent)"></span>
+                <div>
+                  <div style="font-size:0.83rem;font-weight:500;">Grocery price inflation +14%</div>
+                  <div style="font-size:0.78rem;color:var(--text2);margin-top:2px;">Same Whole Foods basket costs $14 more vs 6 months ago. Switching 40% to Trader Joe's could save <span style="color:var(--green)">$44/mo</span>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Heatmap -->
+        <div class="card mt-2">
+          <div class="section-header">
+            <div class="section-title">Spending Heatmap — Past 12 Months</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;font-size:0.75rem;color:var(--text3);">
+            <span>Jan</span><div style="flex:1;display:flex;gap:3px;" id="heatmap-months"></div><span>Dec</span>
+          </div>
+          <div class="heatmap" id="heatmap"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:0.72rem;color:var(--text3);">
+            <span>Low spend</span>
+            <div style="display:flex;gap:3px;">
+              <div style="width:12px;height:12px;border-radius:2px;background:rgba(108,142,255,0.1)"></div>
+              <div style="width:12px;height:12px;border-radius:2px;background:rgba(108,142,255,0.25)"></div>
+              <div style="width:12px;height:12px;border-radius:2px;background:rgba(108,142,255,0.45)"></div>
+              <div style="width:12px;height:12px;border-radius:2px;background:rgba(108,142,255,0.65)"></div>
+              <div style="width:12px;height:12px;border-radius:2px;background:rgba(108,142,255,0.9)"></div>
+            </div>
+            <span>High spend</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT PAGE -->
+    <div class="page" id="page-chat">
+      <div class="page-header">
+        <div>
+          <div class="page-title">AI Financial Advisor</div>
+          <div class="page-sub">Powered by Claude · Context-aware · Private</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" onclick="clearChat()">Clear chat</button>
+        </div>
+      </div>
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg">
+            <div class="msg-avatar ai">AI</div>
+            <div>
+              <div class="msg-name">FinInsight CFO</div>
+              <div class="msg-bubble">
+                Hello! I've analyzed your financial data and I'm ready to help. Here's what caught my attention:<br><br>
+                <strong>🚨 Urgent:</strong> I detected a possible <span class="highlight">duplicate Amazon charge ($47.99)</span> from April 3rd — worth disputing for a quick refund.<br><br>
+                <strong>📊 Trend:</strong> Your late-night food delivery spending is up <span class="highlight">62% this month</span> — I'll dig into this pattern with you.<br><br>
+                <strong>💡 Opportunity:</strong> You have <span class="highlight">$4,200 idle cash</span> above your emergency fund that could be working harder.<br><br>
+                What would you like to explore first?
+              </div>
+              <div class="msg-time">Just now</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-chips" id="chatChips">
+          <div class="chip" onclick="sendChip(this)">Why did I overspend this month?</div>
+          <div class="chip" onclick="sendChip(this)">Analyze my subscriptions</div>
+          <div class="chip" onclick="sendChip(this)">Show spending breakdown</div>
+          <div class="chip" onclick="sendChip(this)">Where can I save money?</div>
+          <div class="chip" onclick="sendChip(this)">Am I on track for my goals?</div>
+          <div class="chip" onclick="sendChip(this)">Explain the Amazon duplicate</div>
+        </div>
+        <div class="chat-input-area">
+          <div class="chat-input-wrap">
+            <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask your personal CFO anything about your finances..." onkeydown="handleKey(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button class="chat-send" onclick="sendMessage()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS PAGE -->
+    <div class="page" id="page-transactions">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Transactions</div>
+          <div class="page-sub">128 transactions · April 2026</div>
+        </div>
+        <div class="header-actions">
+          <select class="btn" id="cat-filter" onchange="filterTransactions()">
+            <option value="">All categories</option>
+            <option value="Dining">Dining</option>
+            <option value="Groceries">Groceries</option>
+            <option value="Transport">Transport</option>
+            <option value="Subscriptions">Subscriptions</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Health">Health</option>
+            <option value="Shopping">Shopping</option>
+          </select>
+          <button class="btn btn-primary" onclick="navigate('upload')">Import CSV</button>
+        </div>
+      </div>
+      <div class="page-content">
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Merchant</th>
+                  <th>Category</th>
+                  <th>Source</th>
+                  <th>Confidence</th>
+                  <th style="text-align:right">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="txTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD PAGE -->
+    <div class="page" id="page-upload">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Import Financial Data</div>
+          <div class="page-sub">All files are processed locally — never stored on external servers</div>
+        </div>
+      </div>
+      <div class="page-content">
+        <div class="grid-2 gap-1">
+          <div>
+            <div class="upload-zone" id="dropZone" onclick="triggerUpload()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+              <div class="upload-icon">📂</div>
+              <div class="upload-title">Drop files here or click to upload</div>
+              <div class="upload-sub">Bank statements, CSV exports, or receipt photos</div>
+              <div class="upload-formats">
+                <span class="fmt-badge">PDF</span>
+                <span class="fmt-badge">CSV</span>
+                <span class="fmt-badge">PNG/JPG</span>
+                <span class="fmt-badge">XLSX</span>
+                <span class="fmt-badge">OFX/QFX</span>
+              </div>
+            </div>
+            <input type="file" id="fileInput" style="display:none" multiple accept=".pdf,.csv,.png,.jpg,.xlsx" onchange="handleFileSelect(event)">
+
+            <div class="upload-progress mt-1" id="uploadProgress">
+              <div id="uploadFileList"></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div class="card">
+              <div class="card-title">Supported Banks</div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+                <div style="font-size:0.83rem;display:flex;align-items:center;gap:8px;"><span class="status-dot" style="background:var(--green)"></span>Chase (PDF + CSV)</div>
+                <div style="font-size:0.83rem;display:flex;align-items:center;gap:8px;"><span class="status-dot" style="background:var(--green)"></span>American Express</div>
+                <div style="font-size:0.83rem;display:flex;align-items:center;gap:8px;"><span class="status-dot" style="background:var(--green)"></span>Bank of America</div>
+                <div style="font-size:0.83rem;display:flex;align-items:center;gap:8px;"><span class="status-dot" style="background:var(--green)"></span>Wells Fargo</div>
+                <div style="font-size:0.83rem;display:flex;align-items:center;gap:8px;"><span class="status-dot" style="background:var(--amber)"></span>Generic CSV (any bank)</div>
+                <div style="font-size:0.83rem;display:flex;align-items:center;gap:8px;"><span class="status-dot" style="background:var(--accent)"></span>Receipt photos (AI OCR)</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Privacy Guarantees</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;font-size:0.8rem;color:var(--text2);">
+                <div>🔐 Files encrypted with AES-256 locally</div>
+                <div>🚫 Zero data transmitted to external servers</div>
+                <div>🗑️ Zero-Retention Mode: auto-deleted after analysis</div>
+                <div>✅ All processing in your browser / local instance</div>
+              </div>
+              <button class="btn btn-danger mt-1" style="width:100%" onclick="deleteAllData()">🗑️ Delete All My Data Forever</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS PAGE -->
+    <div class="page" id="page-insights">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Deep Insights</div>
+          <div class="page-sub">AI-powered pattern analysis · April 2026</div>
+        </div>
+      </div>
+      <div class="page-content">
+        <div class="grid-3 gap-1">
+          <div class="card" style="grid-column:span 2">
+            <div class="section-title" style="margin-bottom:1rem">Monthly Spending by Category</div>
+            <div class="chart-wrap-lg">
+              <canvas id="barChart" role="img" aria-label="Monthly spending per category bar chart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title" style="margin-bottom:1rem">Top Merchants</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Whole Foods</span><span style="font-family:var(--font-mono);color:var(--text2)">$312</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:85%;background:var(--green)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Uber Eats</span><span style="font-family:var(--font-mono);color:var(--text2)">$287</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:78%;background:var(--amber)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Amazon</span><span style="font-family:var(--font-mono);color:var(--text2)">$241</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:65%;background:var(--accent)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Starbucks</span><span style="font-family:var(--font-mono);color:var(--text2)">$178</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:48%;background:var(--coral)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Netflix</span><span style="font-family:var(--font-mono);color:var(--text2)">$52</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:14%;background:var(--purple)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2 gap-1 mt-2">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:1rem">Detailed AI Insights</div>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+              <div class="insight">
+                <div class="insight-icon danger">🔥</div>
+                <div class="insight-body">
+                  <div class="insight-title">Starbucks Routine Detected</div>
+                  <div class="insight-text">22 visits this month vs your 9-visit average. Every weekday morning 8–9am. <strong>Batch-brewing at home 3×/week</strong> would save $468/yr without losing your ritual completely.</div>
+                  <div class="insight-tag tag-danger">HABIT PATTERN</div>
+                </div>
+              </div>
+              <div class="insight">
+                <div class="insight-icon warn">💡</div>
+                <div class="insight-body">
+                  <div class="insight-title">Weekend Spend Asymmetry</div>
+                  <div class="insight-text">You spend <strong>2.4× more on Saturdays</strong> than weekdays ($218 vs $91 avg). Most of this is dining + entertainment clustering. Setting a weekend budget alert at $150 could help.</div>
+                  <div class="insight-tag tag-warn">PATTERN</div>
+                </div>
+              </div>
+              <div class="insight">
+                <div class="insight-icon success">🏆</div>
+                <div class="insight-body">
+                  <div class="insight-title">Transport Optimization Win</div>
+                  <div class="insight-text">Your Uber/Lyft spend dropped <strong>41%</strong> since you started using the subway pass last month. You saved <strong>$127 in March</strong>. Great habit — projecting <strong>$1,524/yr savings</strong>.</div>
+                  <div class="insight-tag tag-success">EXCELLENT</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title" style="margin-bottom:1rem">Spending Forecast — Next 30 Days</div>
+            <div class="chart-wrap">
+              <canvas id="forecastChart" role="img" aria-label="30-day spending forecast"></canvas>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text2);margin-top:10px;padding:8px;background:rgba(108,142,255,0.06);border-radius:6px;border-left:3px solid var(--accent)">
+              Based on your patterns, I predict <strong style="color:var(--text)">$3,420 ± $180</strong> spending next month. Dining is the highest-variance category.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOALS PAGE -->
+    <div class="page" id="page-goals">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Financial Goals</div>
+          <div class="page-sub">Track your progress toward financial freedom</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="showToast('Goal creation coming soon!')">+ New Goal</button>
+        </div>
+      </div>
+      <div class="page-content">
+        <div class="grid-3 gap-1">
+          <div class="card">
+            <div class="card-title">Emergency Fund</div>
+            <div class="card-value" style="color:var(--green);font-size:1.4rem">$12,400</div>
+            <div style="font-size:0.78rem;color:var(--text2);margin:4px 0 12px">Target: $15,000 · 82.7% complete</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:82.7%;background:var(--green)"></div></div>
+            <div style="font-size:0.75rem;color:var(--text2);margin-top:8px">Projected completion: <strong style="color:var(--text)">June 2026</strong></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Japan Vacation ✈️</div>
+            <div class="card-value" style="color:var(--accent);font-size:1.4rem">$3,200</div>
+            <div style="font-size:0.78rem;color:var(--text2);margin:4px 0 12px">Target: $5,000 · 64% complete</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:64%;background:var(--accent)"></div></div>
+            <div style="font-size:0.75rem;color:var(--text2);margin-top:8px">Saving $400/mo · 4.5 months left</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Down Payment 🏠</div>
+            <div class="card-value" style="color:var(--amber);font-size:1.4rem">$18,500</div>
+            <div style="font-size:0.78rem;color:var(--text2);margin:4px 0 12px">Target: $60,000 · 30.8% complete</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:30.8%;background:var(--amber)"></div></div>
+            <div style="font-size:0.75rem;color:var(--text2);margin-top:8px">At $1,000/mo savings → <strong style="color:var(--text)">3.4 years</strong></div>
+          </div>
+        </div>
+
+        <div class="card mt-2">
+          <div class="section-title" style="margin-bottom:1.25rem">Monthly Budget vs Actual</div>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="goal-item">
+              <div class="goal-header">
+                <span class="goal-name">🍽️ Dining & Food Delivery</span>
+                <span class="goal-amounts">$487 / $350 budget</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--red)"></div></div>
+              <div style="font-size:0.72rem;color:var(--red);margin-top:3px">139% of budget · $137 over</div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-header">
+                <span class="goal-name">🛒 Groceries</span>
+                <span class="goal-amounts">$312 / $400 budget</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:78%;background:var(--green)"></div></div>
+              <div style="font-size:0.72rem;color:var(--green);margin-top:3px">78% of budget · $88 remaining</div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-header">
+                <span class="goal-name">🚇 Transport</span>
+                <span class="goal-amounts">$189 / $250 budget</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:75.6%;background:var(--accent)"></div></div>
+              <div style="font-size:0.72rem;color:var(--accent);margin-top:3px">75.6% of budget · On track</div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-header">
+                <span class="goal-name">🎬 Entertainment</span>
+                <span class="goal-amounts">$342 / $150 budget</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--coral)"></div></div>
+              <div style="font-size:0.72rem;color:var(--red);margin-top:3px">228% of budget · One-time event (Coachella)</div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-header">
+                <span class="goal-name">📱 Subscriptions</span>
+                <span class="goal-amounts">$78 / $80 budget</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:97.5%;background:var(--purple)"></div></div>
+              <div style="font-size:0.72rem;color:var(--purple);margin-top:3px">97.5% of budget · Nearly full</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIVACY PAGE -->
+    <div class="page" id="page-privacy">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Privacy & Security</div>
+          <div class="page-sub">Your data, your control. Always.</div>
+        </div>
+      </div>
+      <div class="page-content">
+        <div class="grid-2 gap-1">
+          <div class="card">
+            <div class="card-title">Data Controls</div>
+            <div style="margin-top:0.5rem">
+              <div class="privacy-row">
+                <div>
+                  <div class="privacy-label">Zero-Retention Mode</div>
+                  <div class="privacy-sub">Delete uploaded files immediately after analysis</div>
+                </div>
+                <div class="toggle on" id="toggle-zero" onclick="togglePrivacy(this)"></div>
+              </div>
+              <div class="privacy-row">
+                <div>
+                  <div class="privacy-label">Local Encryption (AES-256)</div>
+                  <div class="privacy-sub">Encrypt all stored financial data at rest</div>
+                </div>
+                <div class="toggle on" id="toggle-encrypt" onclick="togglePrivacy(this)"></div>
+              </div>
+              <div class="privacy-row">
+                <div>
+                  <div class="privacy-label">Conversation Memory</div>
+                  <div class="privacy-sub">Allow AI to remember context across sessions</div>
+                </div>
+                <div class="toggle on" id="toggle-memory" onclick="togglePrivacy(this)"></div>
+              </div>
+              <div class="privacy-row">
+                <div>
+                  <div class="privacy-label">Analytics Insights Sync</div>
+                  <div class="privacy-sub">Share anonymized patterns for better suggestions</div>
+                </div>
+                <div class="toggle" id="toggle-analytics" onclick="togglePrivacy(this)"></div>
+              </div>
+              <div class="privacy-row">
+                <div>
+                  <div class="privacy-label">Anomaly Notifications</div>
+                  <div class="privacy-sub">Get alerted for unusual spending patterns</div>
+                </div>
+                <div class="toggle on" id="toggle-notif" onclick="togglePrivacy(this)"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div class="card">
+              <div class="card-title">Security Status</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;font-size:0.83rem;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="color:var(--green)">●</span> Data encrypted at rest</div>
+                <div style="display:flex;align-items:center;gap:8px;"><span style="color:var(--green)">●</span> No external API calls with PII</div>
+                <div style="display:flex;align-items:center;gap:8px;"><span style="color:var(--green)">●</span> Zero-retention mode active</div>
+                <div style="display:flex;align-items:center;gap:8px;"><span style="color:var(--amber)">●</span> Session expires in 30 min</div>
+                <div style="display:flex;align-items:center;gap:8px;"><span style="color:var(--green)">●</span> Conversation history local-only</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Data Export</div>
+              <div style="font-size:0.8rem;color:var(--text2);margin:8px 0 12px">Download a full export of all your data before deletion</div>
+              <button class="btn" style="width:100%;margin-bottom:8px" onclick="showToast('Export prepared — 847 transactions, 6 months data')">📥 Export All Data (JSON)</button>
+              <button class="btn" style="width:100%;margin-bottom:8px" onclick="showToast('CSV export ready for download')">📊 Export as CSV</button>
+              <button class="btn btn-danger" style="width:100%" onclick="deleteAllData()">🗑️ Delete All My Financial Data Forever</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATA =====
+const transactions = [
+  {date:'2026-04-14',merchant:'Whole Foods Market',category:'Groceries',amount:-87.43,type:'debit',source:'chase_pdf',confidence:0.97},
+  {date:'2026-04-13',merchant:'Uber Eats',category:'Dining',amount:-34.21,type:'debit',source:'chase_pdf',confidence:0.95},
+  {date:'2026-04-12',merchant:'Amazon',category:'Shopping',amount:-47.99,type:'debit',source:'amex_pdf',confidence:0.99},
+  {date:'2026-04-12',merchant:'Amazon',category:'Shopping',amount:-47.99,type:'debit',source:'amex_pdf',confidence:0.99},
+  {date:'2026-04-11',merchant:'Starbucks',category:'Dining',amount:-6.45,type:'debit',source:'chase_pdf',confidence:0.98},
+  {date:'2026-04-11',merchant:'MTA Subway',category:'Transport',amount:-34.00,type:'debit',source:'chase_pdf',confidence:0.96},
+  {date:'2026-04-10',merchant:'Acme Corp — Salary',category:'Income',amount:5800.00,type:'credit',source:'chase_pdf',confidence:1.0},
+  {date:'2026-04-10',merchant:'Netflix',category:'Subscriptions',amount:-15.99,type:'debit',source:'amex_pdf',confidence:0.99},
+  {date:'2026-04-09',merchant:'Trader Joe\'s',category:'Groceries',amount:-62.18,type:'debit',source:'csv',confidence:0.93},
+  {date:'2026-04-09',merchant:'Lyft',category:'Transport',amount:-18.50,type:'debit',source:'chase_pdf',confidence:0.97},
+  {date:'2026-04-08',merchant:'SoulCycle',category:'Health',amount:-32.00,type:'debit',source:'amex_pdf',confidence:0.91},
+  {date:'2026-04-08',merchant:'Spotify',category:'Subscriptions',amount:-9.99,type:'debit',source:'amex_pdf',confidence:0.99},
+  {date:'2026-04-07',merchant:'Chipotle',category:'Dining',amount:-12.75,type:'debit',source:'chase_pdf',confidence:0.96},
+  {date:'2026-04-06',merchant:'AirBnB',category:'Entertainment',amount:-240.00,type:'debit',source:'amex_pdf',confidence:0.88},
+  {date:'2026-04-05',merchant:'CVS Pharmacy',category:'Health',amount:-28.43,type:'debit',source:'csv',confidence:0.89},
+  {date:'2026-04-04',merchant:'Freelance Payment',category:'Income',amount:1200.00,type:'credit',source:'manual',confidence:1.0},
+  {date:'2026-04-03',merchant:'Starbucks',category:'Dining',amount:-7.25,type:'debit',source:'chase_pdf',confidence:0.98},
+  {date:'2026-04-02',merchant:'HBO Max',category:'Subscriptions',amount:-15.99,type:'debit',source:'amex_pdf',confidence:0.99},
+  {date:'2026-04-01',merchant:'Whole Foods Market',category:'Groceries',amount:-94.22,type:'debit',source:'chase_pdf',confidence:0.97},
+  {date:'2026-04-01',merchant:'Target',category:'Shopping',amount:-67.84,type:'debit',source:'amex_pdf',confidence:0.94},
+];
+
+// AI responses
+const aiResponses = {
+  "why did i overspend this month?": `Great question — let me break this down precisely.<br><br><strong>The short answer:</strong> 3 categories drove 89% of your overspend:<br><br><span class="highlight">1. Dining +$137</span> — Mostly Uber Eats after 10pm (9 orders, avg $38). This started the week you mentioned working late on your new project. Late-night delivery is your #1 budget leak right now.<br><br><span class="highlight">2. Entertainment +$192</span> — Coachella AirBnB ($240) was a one-time event. This is a "good" overspend if it was intentional.<br><br><span class="highlight">3. Starbucks +$78</span> — 22 visits vs your 9-visit average. Pure habit creep.<br><br>💡 <strong>If you just address Uber Eats after 10pm</strong>, you'd save ~$300/month and hit your savings goal 4 months earlier. Want me to help set a specific rule for this?`,
+  "analyze my subscriptions": `Here's your full subscription audit:<br><br><strong>Active Subscriptions — $78.94/mo:</strong><br><span class="highlight">Netflix $15.99</span> — Usage: 2hrs/mo ↓ 80% vs 6mo avg<br><span class="highlight">HBO Max $15.99</span> — Usage: 1hr/mo — nearly unused<br><span class="highlight">Spotify $9.99</span> — Daily use ✓ Keep<br><span class="highlight">iCloud 200GB $2.99</span> — Active ✓ Keep<br><span class="highlight">Gym $34.00</span> — 8 visits/mo ✓ Good value ($4.25/visit)<br><br><strong>Recommendation:</strong> Cancel Netflix + HBO Max = <span class="highlight">save $31.98/mo = $383.76/yr</span><br><br>You could cover both with one shared plan. Want me to remind you in 7 days to cancel these?`,
+  "show spending breakdown": `Here's your April 2026 spending breakdown:<br><br>🍽️ <strong>Dining</strong> — $487 (15% of spend, 139% of budget)<br>🛒 <strong>Groceries</strong> — $312 (9.6%)<br>🎬 <strong>Entertainment</strong> — $342 (10.5%)<br>🚇 <strong>Transport</strong> — $189 (5.8%)<br>💊 <strong>Health</strong> — $120 (3.7%)<br>📱 <strong>Subscriptions</strong> — $78 (2.4%)<br>🛍️ <strong>Shopping</strong> — $164 (5.1%, includes the $47.99 duplicate)<br><br><strong>Total Spend:</strong> <span class="highlight">$2,041 debits</span> against <span class="highlight">$7,000 income</span><br><strong>Net Saved:</strong> <span class="highlight">$4,959 = 70.8% savings rate</span> 🎉<br><br>This is actually your <strong>best savings month in 6 months</strong>. The entertainment spike was offset by lower transport costs.`,
+  "where can i save money?": `Based on your specific patterns, here are your top 5 savings opportunities ranked by impact:<br><br><strong>1. Night-time food delivery</strong> → Save <span class="highlight">~$300/mo</span><br>Set a cutoff: no delivery after 10pm. Cook or eat out instead.<br><br><strong>2. Cancel Netflix + HBO Max</strong> → Save <span class="highlight">$32/mo</span><br>You've barely used either in 3 months.<br><br><strong>3. 3× home-brewed coffee/week</strong> → Save <span class="highlight">$39/mo</span><br>Still go to Starbucks for meetings/WFH days.<br><br><strong>4. Grocery brand switching</strong> → Save <span class="highlight">$44/mo</span><br>Same nutritional value at Trader Joe's vs Whole Foods for 40% of your cart.<br><br><strong>5. Negotiate gym rate</strong> → Save <span class="highlight">$8-12/mo</span><br>You've been a member 18 months — ask for a loyalty discount.<br><br><strong>Total potential savings: $423-427/mo = $5,076/yr</strong> 🚀`,
+  "am i on track for my goals?": `Here's your goal progress review:<br><br><strong>🟢 Emergency Fund</strong> — Excellent<br>$12,400 / $15,000 · 82.7% complete · On track for <span class="highlight">June 2026</span><br><br><strong>🟡 Japan Vacation</strong> — Slightly behind<br>$3,200 / $5,000 · 64% complete. Saving $400/mo gets you there by <span class="highlight">Aug 2026</span>. If you redirect the Netflix/HBO savings, you'd arrive 3 weeks earlier.<br><br><strong>🔴 Down Payment</strong> — Needs attention<br>At current pace ($1,000/mo saved), you'll hit $60K in <span class="highlight">41 months (Sep 2029)</span>. Increasing monthly savings by $200 brings this to <span class="highlight">Jul 2028</span>. The dining subscription savings alone could fund this.<br><br><strong>My recommendation:</strong> Prioritize automating an extra $200 to the down payment fund. Based on your spending flexibility, this is achievable without lifestyle impact.`,
+  "explain the amazon duplicate": `I flagged this because I detected two identical Amazon transactions:<br><br><span class="highlight">Apr 3, 2026 · $47.99 · Amazon · AMEX ending 4521</span><br><span class="highlight">Apr 3, 2026 · $47.99 · Amazon · AMEX ending 4521</span><br><br>Both hit within 4 minutes of each other — a classic indicator of a double-charge, not two separate orders. Amazon's system occasionally processes the same order twice during high-traffic periods.<br><br><strong>How to recover $47.99:</strong><br>1. Go to Amazon Orders → check if you see one order or two<br>2. If one order: contact Amazon chat support, reference "duplicate charge Apr 3"<br>3. Alternatively, dispute via your Amex app (takes 5 min)<br><br>Amazon typically resolves these in 3-5 business days. Your success rate on these disputes is essentially 100%. <strong>This is free money — don't let it expire!</strong>`,
+};
+
+// Category colors
+const catColors = {
+  'Dining': '#fbbf24', 'Groceries': '#34d399', 'Transport': '#6c8eff',
+  'Subscriptions': '#a78bfa', 'Entertainment': '#fb923c', 'Health': '#2dd4bf',
+  'Shopping': '#f87171', 'Income': '#34d399',
+};
+
+// ===== NAVIGATION =====
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`[onclick="navigate('${page}')"]`).classList.add('active');
+  if (page === 'transactions') renderTransactions();
+  if (page === 'insights') setTimeout(initInsightCharts, 100);
+}
+
+// ===== CHARTS =====
+let donutChart, trendChart, barChart, forecastChart;
+
+function initCharts() {
+  const catData = [487, 312, 342, 189, 120, 78, 164];
+  const catLabels = ['Dining', 'Groceries', 'Entertainment', 'Transport', 'Health', 'Subscriptions', 'Shopping'];
+  const colors = ['#fbbf24','#34d399','#fb923c','#6c8eff','#2dd4bf','#a78bfa','#f87171'];
+
+  donutChart = new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: colors, borderColor: '#111827', borderWidth: 2, hoverOffset: 6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: $${ctx.raw}` } } }
+    }
+  });
+
+  const months = ['Nov','Dec','Jan','Feb','Mar','Apr'];
+  trendChart = new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [
+        { label: 'Income', data: [5800,5800,7000,5800,5800,7000], borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.06)', fill: true, tension: 0.4, pointRadius: 3 },
+        { label: 'Spending', data: [3520,3890,3100,3241,2950,3241], borderColor: '#6c8eff', backgroundColor: 'rgba(108,142,255,0.06)', fill: true, tension: 0.4, pointRadius: 3 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6680' } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6680', callback: v => '$'+v } } }
+    }
+  });
+
+  initHeatmap();
+}
+
+function initInsightCharts() {
+  if (barChart) { barChart.destroy(); barChart = null; }
+  if (forecastChart) { forecastChart.destroy(); forecastChart = null; }
+
+  const months = ['Nov','Dec','Jan','Feb','Mar','Apr'];
+  barChart = new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [
+        { label: 'Dining', data: [301,420,280,310,295,487], backgroundColor: '#fbbf24' },
+        { label: 'Groceries', data: [280,310,290,300,288,312], backgroundColor: '#34d399' },
+        { label: 'Entertainment', data: [110,210,95,130,88,342], backgroundColor: '#fb923c' },
+        { label: 'Transport', data: [320,280,240,189,171,189], backgroundColor: '#6c8eff' },
+        { label: 'Other', data: [420,380,350,380,360,311], backgroundColor: '#5a6680' },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6680' } },
+        y: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6680', callback: v => '$'+v } }
+      }
+    }
+  });
+
+  const days = Array.from({length: 30}, (_,i) => 'Day '+(i+1));
+  const base = 3241 / 30;
+  const forecast = days.map((_, i) => {
+    const noise = Math.sin(i * 0.8) * 20 + Math.cos(i * 1.2) * 15 + (Math.random() - 0.5) * 25;
+    return Math.round((base + noise) * 10) / 10;
+  });
+  const cumulative = [];
+  forecast.reduce((acc, v, i) => { cumulative[i] = Math.round(acc + v); return acc + v; }, 0);
+
+  forecastChart = new Chart(document.getElementById('forecastChart'), {
+    type: 'line',
+    data: {
+      labels: days.map((_,i) => i % 5 === 0 ? 'Day '+(i+1) : ''),
+      datasets: [
+        { label: 'Daily', data: forecast, borderColor: '#6c8eff', backgroundColor: 'rgba(108,142,255,0.08)', fill: true, tension: 0.4, pointRadius: 0 },
+        { label: 'Avg', data: Array(30).fill(Math.round(base)), borderColor: '#5a6680', borderDash: [4,4], pointRadius: 0 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6680' } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6680', callback: v => '$'+Math.round(v) } } }
+    }
+  });
+}
+
+function initHeatmap() {
+  const heatmap = document.getElementById('heatmap');
+  const intensities = [
+    0.15,0.3,0.5,0.2,0.8,0.4,0.3,0.6,0.9,0.35,0.5,0.7,
+    0.2,0.4,0.6,0.3,0.5,0.9,0.7,0.4,0.8,0.6,0.3,0.9,
+    0.4,0.6,0.2,0.8,0.4,0.5,0.3,0.7,0.5,0.8,0.4,0.6,
+    0.8,0.3,0.9,0.5,0.6,0.2,0.4,0.8,0.7,0.3,0.6,0.9,
+  ];
+  heatmap.innerHTML = intensities.map(v => `<div class="heatmap-cell" style="background:rgba(108,142,255,${v})" title="$${Math.round(v*800+100)} spending"></div>`).join('');
+}
+
+function updateCharts() { /* Would re-fetch with new period */ }
+
+// ===== TRANSACTIONS =====
+function filterTransactions() {
+  renderTransactions();
+}
+
+function renderTransactions() {
+  const filter = document.getElementById('cat-filter')?.value || '';
+  const filtered = filter ? transactions.filter(t => t.category === filter) : transactions;
+  const catClassMap = { Dining:'cat-dining', Groceries:'cat-groceries', Transport:'cat-transport', Subscriptions:'cat-subscriptions', Entertainment:'cat-entertainment', Health:'cat-health', Shopping:'cat-shopping', Income:'cat-income' };
+  const body = document.getElementById('txTableBody');
+  if (!body) return;
+  body.innerHTML = filtered.map(t => `
+    <tr>
+      <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text3)">${t.date}</td>
+      <td>${t.merchant}</td>
+      <td><span class="cat-badge ${catClassMap[t.category]||''}">${t.category}</span></td>
+      <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text3)">${t.source}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="progress-bar" style="width:50px"><div class="progress-fill" style="width:${t.confidence*100}%;background:${t.confidence>0.95?'var(--green)':t.confidence>0.85?'var(--amber)':'var(--red)'}"></div></div>
+          <span style="font-size:0.72rem;color:var(--text3)">${Math.round(t.confidence*100)}%</span>
+        </div>
+      </td>
+      <td style="text-align:right"><span class="${t.type==='credit'?'amount-credit':'amount-debit'}">${t.type==='credit'?'+':''} $${Math.abs(t.amount).toFixed(2)}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ===== CHAT =====
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function sendChip(el) {
+  document.getElementById('chatInput').value = el.textContent;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  appendMsg('user', text);
+  const typing = appendTyping();
+  
+  await delay(1200 + Math.random() * 800);
+  typing.remove();
+  
+  const lowerText = text.toLowerCase();
+  let response = null;
+  for (const [key, val] of Object.entries(aiResponses)) {
+    if (lowerText.includes(key.split(' ')[0]) || lowerText.includes(key.split(' ')[1] || '')) {
+      response = val;
+      break;
+    }
+  }
+  if (!response) {
+    response = `I've analyzed your financial data with that query in mind. Based on your <span class="highlight">April 2026 patterns</span>, I can see you're maintaining a healthy <strong>44.1% savings rate</strong> — which puts you in the top 15% of users in your income bracket.<br><br>Your biggest opportunity remains the late-night food delivery pattern ($487 this month vs $301 average). Would you like me to dig into a specific category, time period, or create a custom alert?`;
+  }
+  
+  appendMsg('ai', response);
+  document.getElementById('chatMessages').scrollTop = 99999;
+}
+
+function appendMsg(role, text) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  div.innerHTML = `
+    <div class="msg-avatar ${role}">${role === 'ai' ? 'AI' : '👤'}</div>
+    <div>
+      <div class="msg-name">${role === 'ai' ? 'FinInsight CFO' : 'You'}</div>
+      <div class="msg-bubble">${text}</div>
+      <div class="msg-time">${now}</div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function appendTyping() {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `<div class="msg-avatar ai">AI</div><div><div class="msg-name">FinInsight CFO</div><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function clearChat() {
+  document.getElementById('chatMessages').innerHTML = '';
+  showToast('Chat cleared. Your financial data remains secure.');
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ===== UPLOAD =====
+function triggerUpload() { document.getElementById('fileInput').click(); }
+
+function handleFileSelect(e) {
+  processFiles(Array.from(e.target.files));
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag');
+  processFiles(Array.from(e.dataTransfer.files));
+}
+
+function processFiles(files) {
+  if (!files.length) return;
+  const progress = document.getElementById('uploadProgress');
+  const list = document.getElementById('uploadFileList');
+  progress.classList.add('show');
+  
+  files.forEach((file, i) => {
+    const item = document.createElement('div');
+    item.className = 'upload-file-item';
+    const icons = {'pdf':'📄','csv':'📊','png':'🖼️','jpg':'🖼️','xlsx':'📈'};
+    const ext = file.name.split('.').pop().toLowerCase();
+    item.innerHTML = `
+      <div class="file-icon">${icons[ext] || '📁'}</div>
+      <div class="file-info">
+        <div class="file-name">${file.name}</div>
+        <div class="file-size">${(file.size/1024).toFixed(1)} KB</div>
+      </div>
+      <div class="file-status" id="status-${i}">Analyzing...</div>`;
+    list.appendChild(item);
+
+    setTimeout(() => {
+      const status = document.getElementById(`status-${i}`);
+      if (status) { status.textContent = '✓ Processed — 24 transactions imported'; status.style.color = 'var(--green)'; }
+      showToast(`${file.name} processed — 24 new transactions added`);
+    }, 1500 + i * 800);
+  });
+}
+
+// ===== PRIVACY =====
+function togglePrivacy(el) {
+  el.classList.toggle('on');
+  const label = el.parentElement.querySelector('.privacy-label').textContent;
+  showToast(`${label}: ${el.classList.contains('on') ? 'Enabled' : 'Disabled'}`);
+}
+
+function deleteAllData() {
+  if (confirm('⚠️ This will permanently delete ALL your financial data, transaction history, and AI conversation history. This action cannot be undone.\n\nAre you absolutely sure?')) {
+    showToast('🗑️ All financial data has been securely wiped. Goodbye!');
+    setTimeout(() => { document.getElementById('txTableBody').innerHTML = ''; }, 500);
+  }
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ===== INIT =====
+window.addEventListener('load', () => {
+  initCharts();
+  renderTransactions();
+});
+</script>
+</body>
+</html>
