@@ -758,11 +758,6 @@ B.Tech CSE · UIET, CSJMU Kanpur
 
 If this project was useful to you, consider starring it.
 
-<a href="https://github.com/yourusername/fininsight-ai">
-  <img src="https://img.shields.io/github/stars/yourusername/fininsight-ai?style=social" alt="GitHub Stars" />
-</a>
-
-<br/><br/>
 
 <sub>Made with care in Kanpur, India · MIT Licensed · PRs welcome</sub>
 
